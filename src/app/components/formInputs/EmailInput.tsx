@@ -1,42 +1,61 @@
 import React, { useState } from 'react'
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import { InputProps } from '@/models/Application'
 
-const EmailInput = () => {
-  const [email, setEmail] = useState('')
 
-  const handleEmailChange = (e: { target: { value: React.SetStateAction<string> } }) => {
-    setEmail(e.target.value)
-  }
+const EmailInput: React.FC<InputProps> = ({ updateFormAnswer }) => {
+	const [email, setEmail] = useState('')
+	const [answerIndex, setAnswerIndex] = useState(-1);
+	const [errorMessage, setErrorMessage] = useState('')
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
-    e.preventDefault()
-    if (!email.trim()) {
-    } else console.log('Email submitted:', email)
-  }
+	const handleChange = (e: { target: { value: React.SetStateAction<string> } }) => {
+		setEmail(e.target.value)
+		setErrorMessage('') // Clear the error message when user starts typing
+	}
 
-  return (
-    <div className='flex justify-center items-center bg-slate-300 rounded-3xl my-2 p-6'>
-      <div className='w-full max-w-lg'>
-        <form onSubmit={handleSubmit}>
-          <div className='mb-1'>
-            <label htmlFor='email' className='text-slate-600'>
-              Email:
-            </label>
-            <input
-              id='email'
-              type='email'
-              placeholder='example: info@iyteyazilim.com'
-              className='w-full px-4 py-2 border rounded-md focus:outline-none focus:border-blue-500 text-black'
-              value={email}
-              onChange={handleEmailChange}
-            />
-          </div>
-          <button type='submit' className='bg-orange-400 rounded-md px-2 py-1 justify-center '>
-            Submit
-          </button>
-        </form>
-      </div>
-    </div>
-  )
+	const handleBlur = () => {
+		if (!email.trim()) {
+			setErrorMessage('Email cannot be empty')
+		} else if (!validateEmail(email)) {
+			setErrorMessage('Please enter a valid email')
+		} else {
+			console.log('Email submitted:', email)
+			setErrorMessage('') // Clear any previous error messages
+			if (answerIndex == -1) {
+				setAnswerIndex(updateFormAnswer(email, 1));
+			}
+			else {
+				updateFormAnswer(email, 1, answerIndex);
+			}
+		}
+	}
+
+	const validateEmail = (email: string) => {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+		return emailRegex.test(email)
+	}
+
+	return (
+		<div style={{ display: 'flex', justifyContent: 'center' }}>
+			<Box
+				component='form'
+				sx={{ '& .MuiTextField-root': { m: 1, width: 'flex' } }}
+				noValidate
+				autoComplete='off'
+			>
+				<TextField
+					error={Boolean(errorMessage)}
+					helperText={errorMessage}
+					label={"E-mail"}
+					placeholder={"info@yazilim.com"}
+					id='outlined-error-helper-text'
+					onChange={handleChange}
+					onBlur={handleBlur}
+				/>
+			</Box>
+		</div>
+	);
 }
 
 export default EmailInput
